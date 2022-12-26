@@ -5,3 +5,4 @@ __pycache__
 .venv
 *.jpg
 *.avi
+python/myenv
