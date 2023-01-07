@@ -1,10 +1,10 @@
 from socket import socket
 
-PORT = 33333
+PORT = 55555
 
 def main():
     with socket() as client:
-        client.connect(('127.0.0.1', PORT))
+        client.connect(('84.201.139.158', PORT))
         print('Установлено соединение с сервером')
         while True:
             text = input('Введите сообщение: ')
