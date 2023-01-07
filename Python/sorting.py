@@ -5,7 +5,6 @@ from threading import Thread
 from benchmark import TimeBenchmark
 
 
-
 @TimeBenchmark
 def InsertionSortArray(arr: array) -> array:
     newArray = copy(arr)
@@ -39,7 +38,7 @@ def BubbleSortArray(arr: array) -> array:
     newArray = copy(arr)
     for i in range(len(newArray)-1):
         for j in range(len(newArray)-i-1):
-            if(newArray[j] > newArray[j+1]):
+            if (newArray[j] > newArray[j+1]):
                 (newArray[j], newArray[j+1]) = (newArray[j+1], newArray[j])
     return newArray
 
@@ -49,7 +48,7 @@ def BubbleSortList(lst: list) -> list:
     newList = lst[::]
     for i in range(len(newList)-1):
         for j in range(len(newList)-i-1):
-            if(newList[j] > newList[j+1]):
+            if (newList[j] > newList[j+1]):
                 (newList[j], newList[j+1]) = (newList[j+1], newList[j])
     return newList
 
@@ -135,7 +134,8 @@ def CountingSortListParallel(arr: list) -> list:
     for i in range(countThread):
         start = i * countPerThread
         end = len(arr) if i == countThread-1 else start + countPerThread
-        thread = Thread(target=_CountValues, args=(arr, start, end, countArray, offset))
+        thread = Thread(target=_CountValues, args=(
+            arr, start, end, countArray, offset))
         threades.append(thread)
         thread.start()
 
@@ -163,36 +163,55 @@ def PythonSortList(lst: list) -> list:
     return sorted(lst)
 
 
-if __name__ == '__main__':
-    COUNT = 1000000
-    # freeze_support()
-    testList = [random.randint(-1000, 1001) for _ in range(COUNT)]
-    # testArray = array('i', testList)
-    # libSortArray = PythonSortArray(testArray)
-    libSortList = PythonSortList(testList)
-    # insertSortArray = InsertionSortArray(testArray)
-    # insertSortList = InsertionSortList(testList)
-    # bubbleSortArray = BubbleSortArray(testArray)
-    # bubbleSortList = BubbleSortList(testList)
-    # quickSortArray = QuickSortArray(testArray)
-    # quickSortList = QuickSortList(testList)
-    countingSortList = CountingSortList(testList)
-    countingSortListParallel = CountingSortListParallel(testList)
-    print(countingSortList == countingSortListParallel)
+def _MergeSortLstImpl(lst: list, start: int, end: int):
+    if start == end:
+        return []
+    if end - start == 1:
+        return [lst[start]]
 
-    # print(f"Исходный массив:\n[{', '.join(map(str, testArray))}]")
-    # print(
-    #     f"Сортировка массива библиотечная:\n[{', '.join(map(str, libSortArray))}]")
-    # print(
-    #     f"Сортировка массива вставкой:\n[{', '.join(map(str, insertSortArray))}]")
-    # print(
-    #     f"Сортировка массива пузырьком:\n[{', '.join(map(str, bubbleSortArray))}]")
-    # print(f"Быстрая сорировка массива:\n[{', '.join(map(str, quickSortArray))}]")
-    # print(
-    #     f"Сортировка массива подсчетом:\n[{', '.join(map(str, countingSortArray))}]")
+    lstA = _MergeSortLstImpl(lst, start, (end-start) // 2 + start)
+    lstB = _MergeSortLstImpl(lst, (end-start) // 2 + start, end)
+    merged = []
+
+    while lstA or lstB:
+        if not lstB:
+            merged.extend(lstA)
+            return merged
+        elif not lstA:
+            merged.extend(lstB)
+            return merged
+        else:
+            if lstA[0] < lstB[0]:
+                merged.append(lstA.pop(0))
+            else:
+                merged.append(lstB.pop(0))
+    return merged
+
+
+@TimeBenchmark
+def MergeSortList(lst: list) -> list:
+    return _MergeSortLstImpl(lst, 0, len(lst))
+
+
+if __name__ == '__main__':
+    COUNT = 100000
+    # freeze_support()
+
+    testList = [random.randint(-1000, 1001) for _ in range(COUNT)]
+
+    libSortList = PythonSortList(testList)
+    # insertSortList = InsertionSortList(testList)
+    # bubbleSortList = BubbleSortList(testList)
+    quickSortList = QuickSortList(testList)
+    countingSortList = CountingSortList(testList)
+    # countingSortListParallel = CountingSortListParallel(testList)
+    mergeSortList = MergeSortList(testList)
+
 
     # print(f"Исходный список:\n[{', '.join(map(str, testList))}]")
     # print(f"Сортировка списка библиотечная:\n[{', '.join(map(str, libSortList))}]")
     # print(f"Сортировка списка вставкой:\n[{', '.join(map(str, insertSortList))}]")
     # print(f"Сортировка списка пузырьком:\n[{', '.join(map(str, bubbleSortList))}]")
     # print(f"Быстрая сорировка списка:\n[{', '.join(map(str, quickSortList))}]")
+    # print(f"Сортировка списка слиянием:\n[{', '.join(map(str, mergeSortList))}]")
+    print(libSortList == mergeSortList)
